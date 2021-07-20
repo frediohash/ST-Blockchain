@@ -6,6 +6,16 @@ class Transaction{
         this.toAddress = toAddress;
         this.amount = amount;
     }
+
+    calculateHash(){
+        return SHA256(this.fromAddress + this.toAddress + this.amount).toString();
+    }
+
+    signTransaction(signingKey){
+        const hashTX = this.calculateHash();
+        const sig = signingKey.sign(hashTX, 'base64');
+        this.signature = sig.toDer('hex');
+    }
 }
 
 class Block{
