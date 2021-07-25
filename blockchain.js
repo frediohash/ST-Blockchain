@@ -12,9 +12,17 @@ class Transaction{
     }
 
     signTransaction(signingKey){
+        if(signingKey.getPublic('hex') !== this.fromAddress){
+            throw new Error('You cannot sign transaction for other wallets!');
+        }
+
         const hashTX = this.calculateHash();
         const sig = signingKey.sign(hashTX, 'base64');
         this.signature = sig.toDer('hex');
+    }
+
+    isValid(){
+        
     }
 }
 
@@ -52,15 +60,16 @@ class Blockchain{
         return this.chain[this.chain.length-1];
     }
     minePendingTransaction(miningRewardAddress){
+        const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
+        this.pendingTransactions.push(rewardTx);
+
         let block = new Block(Date.now(), this.pendingTransactions, this.previousHash);
-        block.mineBlock(this.difficulty);
+        block.mineBlock(this.difficulty);        
 
         console.log("Block Successfully Mined");
         this.chain.push(block);
 
-        this.pendingTransactions = [
-            new Transaction(null, miningRewardAddress, this.miningReward)
-        ];
+        this.pendingTransactions = [];
     }
     createTransaction(transaction){
         this.pendingTransactions.push(transaction);
